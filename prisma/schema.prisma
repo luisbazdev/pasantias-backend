@@ -116,7 +116,7 @@ model Historiales{
 
 model Historiales_embarazos{
   id        Int      @id @default(autoincrement())
-  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id])
+  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id], onDelete: Cascade)
   historial_medico_id Int
   fecha   String? @db.Text
   tipo_de_parto   String? @db.Text
@@ -135,7 +135,7 @@ model Historiales_embarazos{
 
 model Historiales_embarazadas{
   id        Int      @id @default(autoincrement())
-  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id])
+  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id], onDelete: Cascade)
   historial_medico_id Int @unique
   hematologias Historiales_embarazadas_hematologias[]
   examenes_obstetricos Historiales_embarazadas_examenes_obstetricos[]
@@ -195,7 +195,7 @@ model Historiales_embarazadas{
 
 model Historiales_embarazadas_hematologias{
   id        Int      @id @default(autoincrement())
-  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id])
+  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id], onDelete: Cascade)
   historial_embarazada_id Int
   globulos_rojos   String? @db.Text
   globulos_blancos   String? @db.Text
@@ -206,7 +206,7 @@ model Historiales_embarazadas_hematologias{
 
 model Historiales_embarazadas_examenes_obstetricos{
   id        Int      @id @default(autoincrement())
-  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id])
+  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id], onDelete: Cascade)
   historial_embarazada_id Int
   fecha   String? @db.Text
   nauseas_o_vomitos   String? @db.Text
