@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Historiales{
+  id        Int      @id @default(autoincrement())
+  historial_embarazada Historiales_embarazadas?
+  embarazos Historiales_embarazos[]
+  numero_de_historia   String? @db.Text
+  fecha   String? @db.Text
+  revisada   String? @db.Text
+  clasificada   String? @db.Text
+  archivada   String? @db.Text
+  centro_asistencial   String? @db.Text
+  tipo   String? @db.Text
+  codigo_de_origen   String? @db.Text
+  ubicacion_geografica   String? @db.Text
+  nombre   String? @db.Text
+  cedula_de_identidad   String? @db.Text
+  edad   String? @db.Text
+  fecha_de_nacimiento   String? @db.Text
+  lugar_de_nacimiento   String? @db.Text
+  estado_civil   String? @db.Text
+  profesion   String? @db.Text
+  ocupacion   String? @db.Text
+  direccion_de_habitacion   String? @db.Text
+  telefono   String? @db.Text
+  nombre_conyuge   String? @db.Text
+  direccion_conyuge   String? @db.Text
+  antecedentes_familiares_tbc   String? @db.Text
+  antecedentes_familiares_sifilis   String? @db.Text
+  antecedentes_familiares_diabetes   String? @db.Text
+  antecedentes_familiares_neurologicas_y_mentales   String? @db.Text
+  antecedentes_familiares_cardiopatias   String? @db.Text
+  antecedentes_familiares_nefritis   String? @db.Text
+  antecedentes_familiares_embarazos_multiples   String? @db.Text
+  antecedentes_familiares_otros   String? @db.Text
+  antecedentes_familiares_cancer   String? @db.Text
+  datos_menstruales_edad_menarquia   String? @db.Text
+  datos_menstruales_ciclo   String? @db.Text
+  datos_menstruales_duracion   String? @db.Text
+  datos_menstruales_cantidad   String? @db.Text
+  datos_menstruales_dolor   String? @db.Text
+  historia_medica_pasada_eruptivas   String? @db.Text
+  historia_medica_pasada_buba   String? @db.Text
+  historia_medica_pasada_cardiopatias   String? @db.Text
+  historia_medica_pasada_toxemias   String? @db.Text
+  historia_medica_pasada_mastitis   String? @db.Text
+  historia_medica_pasada_transfusiones   String? @db.Text
+  historia_medica_pasada_rubeola   String? @db.Text
+  historia_medica_pasada_chagas   String? @db.Text
+  historia_medica_pasada_tbc   String? @db.Text
+  historia_medica_pasada_varices   String? @db.Text
+  historia_medica_pasada_heridas   String? @db.Text
+  historia_medica_pasada_alergias   String? @db.Text
+  historia_medica_pasada_parasitosis   String? @db.Text
+  historia_medica_pasada_toxoplasmosis   String? @db.Text
+  historia_medica_pasada_diabetes   String? @db.Text
+  historia_medica_pasada_hemorroides   String? @db.Text
+  historia_medica_pasada_cicatrices   String? @db.Text
+  historia_medica_pasada_sulfonamidas   String? @db.Text
+  historia_medica_pasada_bilharziosis   String? @db.Text
+  historia_medica_pasada_micosis   String? @db.Text
+  historia_medica_pasada_tiroides   String? @db.Text
+  historia_medica_pasada_flebitis   String? @db.Text
+  historia_medica_pasada_fracturas   String? @db.Text
+  historia_medica_pasada_antibioticos   String? @db.Text
+  historia_medica_pasada_paludismo   String? @db.Text
+  historia_medica_pasada_nefropatias   String? @db.Text
+  historia_medica_pasada_electrocoagulaciones   String? @db.Text
+  historia_medica_pasada_otro   String? @db.Text
+  antecedentes_quirurgicos   String? @db.Text
+  embarazo_actual_ultimo_periodo   String? @db.Text
+  embarazo_actual_caracteres   String? @db.Text
+  embarazo_actual_primeros_movimientos   String? @db.Text
+  embarazo_actual_fecha_parto_probable   String? @db.Text
+  embarazo_actual_reposo_prenatal_desde   String? @db.Text
+  nombre_medico   String? @db.Text
+  registro_mpps   String? @db.Text
+  firma   String? @db.Text
+  examen_fisico_talla   String? @db.Text
+  examen_fisico_peso_previo   String? @db.Text
+  examen_fisico_aspecto_general   String? @db.Text
+  examen_fisico_edemas   String? @db.Text
+  examen_fisico_piel   String? @db.Text
+  examen_fisico_senos   String? @db.Text
+  examen_fisico_sistema_nervioso   String? @db.Text
+  examen_fisico_abdomen   String? @db.Text
+  examen_fisico_aparato_digestivo   String? @db.Text
+  examen_fisico_vulva_y_perine   String? @db.Text
+  examen_fisico_aparato_circulatorio   String? @db.Text
+  examen_fisico_vagina   String? @db.Text
+  examen_fisico_aparato_respiratorio   String? @db.Text
+  examen_fisico_cuello   String? @db.Text
+  examen_fisico_rx_pulmonar   String? @db.Text
+  examen_fisico_cuerpo_uterino   String? @db.Text
+  examen_fisico_aparato_urinario   String? @db.Text
+  examen_fisico_aparato_locomotor   String? @db.Text
+  examen_fisico_sistema_ganglionar   String? @db.Text
+  examen_fisico_varices   String? @db.Text
+  examen_fisico_otros   String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Historiales_embarazos{
+  id        Int      @id @default(autoincrement())
+  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id])
+  historial_medico_id Int
+  fecha   String? @db.Text
+  tipo_de_parto   String? @db.Text
+  tiempo_de_trabajo   String? @db.Text
+  hemorragia   String? @db.Text
+  lesion_perineal   String? @db.Text
+  toxemia   String? @db.Text
+  puerperio   String? @db.Text
+  peso_del_infante   String? @db.Text
+  vivo_o_muerto   String? @db.Text
+  sexo   String? @db.Text
+  observaciones   String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Historiales_embarazadas{
+  id        Int      @id @default(autoincrement())
+  historial_medico   Historiales  @relation(fields: [historial_medico_id], references: [id])
+  historial_medico_id Int @unique
+  hematologias Historiales_embarazadas_hematologias[]
+  examenes_obstetricos Historiales_embarazadas_examenes_obstetricos[]
+  pelvimetria_biisquiatico   String? @db.Text
+  pelvimetria_sagital_anterior   String? @db.Text
+  pelvimetria_promontorio   String? @db.Text
+  pelvimetria_muescas_sacrociaticas   String? @db.Text
+  pelvimetria_espinas_ciaticas   String? @db.Text
+  pelvimetria_arco_pubico   String? @db.Text
+  pelvimetria_sacro   String? @db.Text
+  radiologia   String? @db.Text
+  parto_fecha   String? @db.Text
+  parto_hora   String? @db.Text
+  parto_hospitalizada_en   String? @db.Text
+  parto_dias_hospitalizada   String? @db.Text
+  parto_duracion_del_trabajo   String? @db.Text
+  parto_tipo_de_parto   String? @db.Text
+  parto_lesion_perineal   String? @db.Text
+  parto_hemorragia   String? @db.Text
+  parto_puerperio   String? @db.Text
+  recien_nacido_peso   String? @db.Text
+  recien_nacido_sexo   String? @db.Text
+  recien_nacido_talla   String? @db.Text
+  recien_nacido_observaciones   String? @db.Text
+  examen_post_parto_estado_general   String? @db.Text
+  examen_post_parto_flujo   String? @db.Text
+  examen_post_parto_genitales_externos   String? @db.Text
+  examen_post_parto_piso_pelvico_firma   String? @db.Text
+  examen_post_parto_piso_pelvico_relajado   String? @db.Text
+  examen_post_parto_piso_pelvico_cistocele   String? @db.Text
+  examen_post_parto_piso_pelvico_rectocele   String? @db.Text
+  examen_post_parto_desgarros   String? @db.Text
+  examen_post_parto_tacto   String? @db.Text
+  examen_post_parto_especulo   String? @db.Text
+  examen_post_parto_observaciones   String? @db.Text
+  referida_a_servicio_social  Boolean  @default(false)
+  referida_a_servicio_social_fecha   String? @db.Text
+  referida_a_servicio_social_resultado   String? @db.Text
+  referida_a_servicio_cardiologia   Boolean  @default(false)
+  referida_a_servicio_cardiologia_fecha   String? @db.Text
+  referida_a_servicio_cardiologia_resultado   String? @db.Text
+  referida_a_servicio_odontologia   Boolean  @default(false)
+  referida_a_servicio_odontologia_fecha   String? @db.Text
+  referida_a_servicio_odontologia_resultado   String? @db.Text
+  referida_a_servicio_oftalmologia   Boolean  @default(false)
+  referida_a_servicio_oftalmologia_fecha   String? @db.Text
+  referida_a_servicio_oftalmologia_resultado   String? @db.Text
+  referida_a_servicio_medicina_interna   Boolean  @default(false)
+  referida_a_servicio_medicina_interna_fecha   String? @db.Text
+  referida_a_servicio_medicina_interna_resultado   String? @db.Text
+  referida_a_servicio_reumatologia   Boolean  @default(false)
+  referida_a_servicio_reumatologia_fecha   String? @db.Text
+  referida_a_servicio_reumatologia_resultado   String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Historiales_embarazadas_hematologias{
+  id        Int      @id @default(autoincrement())
+  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id])
+  historial_embarazada_id Int
+  globulos_rojos   String? @db.Text
+  globulos_blancos   String? @db.Text
+  hb   String? @db.Text
+  hematocrito   String? @db.Text
+  vcm   String? @db.Text
+}
+
+model Historiales_embarazadas_examenes_obstetricos{
+  id        Int      @id @default(autoincrement())
+  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id])
+  historial_embarazada_id Int
+  fecha   String? @db.Text
+  nauseas_o_vomitos   String? @db.Text
+  constipacion   String? @db.Text
+  algias   String? @db.Text
+  calambres   String? @db.Text
+  varices   String? @db.Text
+  insomnio   String? @db.Text
+  cefalea   String? @db.Text
+  peso   String? @db.Text
+  edemas   String? @db.Text
+  orina_a   String? @db.Text
+  orina_g   String? @db.Text
+  ta   String? @db.Text
+  altura_uterina   String? @db.Text
+  presentacion   String? @db.Text
+  foco_fetal   String? @db.Text
+  hemorragias_extra_genitales   String? @db.Text
+  firma_o_registro_mpps   String? @db.Text
+}
