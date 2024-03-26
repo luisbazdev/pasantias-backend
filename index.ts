@@ -13,25 +13,29 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// add try and catch blocks
 
 app.get("/historiales/:id", async (req: any, res: any) => {
-  const { id } = req.params;
-  const historialMedico = await prisma.historiales.findUnique({
-    where: {
-      id: parseInt(id),
-    },
-    include: {
-      embarazos: true,
-      historial_embarazada: {
-        include: {
-          hematologias: true,
-          examenes_obstetricos: true,
-        }
+  try {
+    const { id } = req.params;
+    const historialMedico = await prisma.historiales.findUnique({
+      where: {
+        id: parseInt(id),
       },
-    }
-  })
-  res.json(historialMedico);
+      include: {
+        embarazos: true,
+        historial_embarazada: {
+          include: {
+            hematologias: true,
+            examenes_obstetricos: true,
+          }
+        },
+      }
+    })
+    res.json(historialMedico);
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+
 })
 
 app.get("/historiales", async (req: any, res: any) => {
@@ -382,19 +386,341 @@ app.post("/historiales", async (req: any, res: any) => {
   res.json({mensaje: "El historial ha sido creado"});
 })
 
-/*app.put("/historiales/{id}", async (req, res) => {
+app.put("/historiales/{id}", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-})*/
+    const {
+      historial_embarazada,
+      numero_de_historia   ,
+    fecha   ,
+    revisada   ,
+    clasificada   ,
+    archivada   ,
+    centro_asistencial   ,
+    tipo   ,
+    codigo_de_origen   ,
+    ubicacion_geografica   ,
+    nombre   ,
+    cedula_de_identidad   ,
+    edad   ,
+    fecha_de_nacimiento   ,
+    lugar_de_nacimiento   ,
+    estado_civil   ,
+    profesion   ,
+    ocupacion   ,
+    direccion_de_habitacion   ,
+    telefono   ,
+    nombre_conyuge   ,
+    direccion_conyuge   ,
+    antecedentes_familiares_tbc   ,
+    antecedentes_familiares_sifilis   ,
+    antecedentes_familiares_diabetes   ,
+    antecedentes_familiares_neurologicas_y_mentales   ,
+    antecedentes_familiares_cardiopatias   ,
+    antecedentes_familiares_nefritis   ,
+    antecedentes_familiares_embarazos_multiples   ,
+    antecedentes_familiares_otros   ,
+    antecedentes_familiares_cancer   ,
+    datos_menstruales_edad_menarquia   ,
+    datos_menstruales_ciclo   ,
+    datos_menstruales_duracion   ,
+    datos_menstruales_cantidad   ,
+    datos_menstruales_dolor   ,
+    historia_medica_pasada_eruptivas   ,
+    historia_medica_pasada_buba   ,
+    historia_medica_pasada_cardiopatias   ,
+    historia_medica_pasada_toxemias   ,
+    historia_medica_pasada_mastitis   ,
+    historia_medica_pasada_transfusiones   ,
+    historia_medica_pasada_rubeola   ,
+    historia_medica_pasada_chagas   ,
+    historia_medica_pasada_tbc   ,
+    historia_medica_pasada_varices   ,
+    historia_medica_pasada_heridas   ,
+    historia_medica_pasada_alergias   ,
+    historia_medica_pasada_parasitosis   ,
+    historia_medica_pasada_toxoplasmosis   ,
+    historia_medica_pasada_diabetes   ,
+    historia_medica_pasada_hemorroides  ,
+    historia_medica_pasada_cicatrices  ,
+    historia_medica_pasada_sulfonamidas ,
+    historia_medica_pasada_bilharziosis   ,
+    historia_medica_pasada_micosis   ,
+    historia_medica_pasada_tiroides  ,
+    historia_medica_pasada_flebitis  ,
+    historia_medica_pasada_fracturas  ,
+    historia_medica_pasada_antibioticos ,
+    historia_medica_pasada_paludismo  ,
+    historia_medica_pasada_nefropatias ,
+    historia_medica_pasada_electrocoagulaciones ,
+    historia_medica_pasada_otro   ,
+    antecedentes_quirurgicos  ,
+    embarazo_actual_ultimo_periodo  ,
+    embarazo_actual_caracteres  ,
+    embarazo_actual_primeros_movimientos  ,
+    embarazo_actual_fecha_parto_probable   ,
+    embarazo_actual_reposo_prenatal_desde  ,
+    nombre_medico  ,
+    registro_mpps   ,
+    firma   ,
+    examen_fisico_talla   ,
+    examen_fisico_peso_previo   ,
+    examen_fisico_aspecto_general  ,
+    examen_fisico_edemas   ,
+    examen_fisico_piel   ,
+    examen_fisico_senos   ,
+    examen_fisico_sistema_nervioso   ,
+    examen_fisico_abdomen ,
+    examen_fisico_aparato_digestivo,
+    examen_fisico_vulva_y_perine,
+    examen_fisico_aparato_circulatorio,
+    examen_fisico_vagina,
+    examen_fisico_aparato_respiratorio,
+    examen_fisico_cuello,
+    examen_fisico_rx_pulmonar,
+    examen_fisico_cuerpo_uterino,
+    examen_fisico_aparato_urinario,
+    examen_fisico_aparato_locomotor,
+    examen_fisico_sistema_ganglionar,
+    examen_fisico_varices,
+    examen_fisico_otros
+    } = req.body;
+
+    // talvez el historial_embarazada debe hacerse de manera diferente.
+    await prisma.historiales.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        historial_embarazada,
+        numero_de_historia   ,
+      fecha   ,
+      revisada   ,
+      clasificada   ,
+      archivada   ,
+      centro_asistencial   ,
+      tipo   ,
+      codigo_de_origen   ,
+      ubicacion_geografica   ,
+      nombre   ,
+      cedula_de_identidad   ,
+      edad   ,
+      fecha_de_nacimiento   ,
+      lugar_de_nacimiento   ,
+      estado_civil   ,
+      profesion   ,
+      ocupacion   ,
+      direccion_de_habitacion   ,
+      telefono   ,
+      nombre_conyuge   ,
+      direccion_conyuge   ,
+      antecedentes_familiares_tbc   ,
+      antecedentes_familiares_sifilis   ,
+      antecedentes_familiares_diabetes   ,
+      antecedentes_familiares_neurologicas_y_mentales   ,
+      antecedentes_familiares_cardiopatias   ,
+      antecedentes_familiares_nefritis   ,
+      antecedentes_familiares_embarazos_multiples   ,
+      antecedentes_familiares_otros   ,
+      antecedentes_familiares_cancer   ,
+      datos_menstruales_edad_menarquia   ,
+      datos_menstruales_ciclo   ,
+      datos_menstruales_duracion   ,
+      datos_menstruales_cantidad   ,
+      datos_menstruales_dolor   ,
+      historia_medica_pasada_eruptivas   ,
+      historia_medica_pasada_buba   ,
+      historia_medica_pasada_cardiopatias   ,
+      historia_medica_pasada_toxemias   ,
+      historia_medica_pasada_mastitis   ,
+      historia_medica_pasada_transfusiones   ,
+      historia_medica_pasada_rubeola   ,
+      historia_medica_pasada_chagas   ,
+      historia_medica_pasada_tbc   ,
+      historia_medica_pasada_varices   ,
+      historia_medica_pasada_heridas   ,
+      historia_medica_pasada_alergias   ,
+      historia_medica_pasada_parasitosis   ,
+      historia_medica_pasada_toxoplasmosis   ,
+      historia_medica_pasada_diabetes   ,
+      historia_medica_pasada_hemorroides  ,
+      historia_medica_pasada_cicatrices  ,
+      historia_medica_pasada_sulfonamidas ,
+      historia_medica_pasada_bilharziosis   ,
+      historia_medica_pasada_micosis   ,
+      historia_medica_pasada_tiroides  ,
+      historia_medica_pasada_flebitis  ,
+      historia_medica_pasada_fracturas  ,
+      historia_medica_pasada_antibioticos ,
+      historia_medica_pasada_paludismo  ,
+      historia_medica_pasada_nefropatias ,
+      historia_medica_pasada_electrocoagulaciones ,
+      historia_medica_pasada_otro   ,
+      antecedentes_quirurgicos  ,
+      embarazo_actual_ultimo_periodo  ,
+      embarazo_actual_caracteres  ,
+      embarazo_actual_primeros_movimientos  ,
+      embarazo_actual_fecha_parto_probable   ,
+      embarazo_actual_reposo_prenatal_desde  ,
+      nombre_medico  ,
+      registro_mpps   ,
+      firma   ,
+      examen_fisico_talla   ,
+      examen_fisico_peso_previo   ,
+      examen_fisico_aspecto_general  ,
+      examen_fisico_edemas   ,
+      examen_fisico_piel   ,
+      examen_fisico_senos   ,
+      examen_fisico_sistema_nervioso   ,
+      examen_fisico_abdomen ,
+      examen_fisico_aparato_digestivo,
+      examen_fisico_vulva_y_perine,
+      examen_fisico_aparato_circulatorio,
+      examen_fisico_vagina,
+      examen_fisico_aparato_respiratorio,
+      examen_fisico_cuello,
+      examen_fisico_rx_pulmonar,
+      examen_fisico_cuerpo_uterino,
+      examen_fisico_aparato_urinario,
+      examen_fisico_aparato_locomotor,
+      examen_fisico_sistema_ganglionar,
+      examen_fisico_varices,
+      examen_fisico_otros,
+      },
+    })
+    res.json({mensaje: "El historial medico ha sido actualizado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+})
 
 app.delete("/historiales/:id", async (req: any, res: any) => {
-  const { id } = req.params;
-  await prisma.historiales.delete({
-    where: {
-      id: parseInt(id),
-    },
-  })
-  res.json({mensaje: "El historial ha sido eliminado"});
+  try {
+    const { id } = req.params;
+    await prisma.historiales.delete({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    res.json({mensaje: "El historial ha sido eliminado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
 })
+
+app.put("/historiales/embarazos/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { fecha, tipo_de_parto, tiempo_de_trabajo, hemorragia, lesion_perineal, toxemia, puerperio, peso_del_infante, vivo_o_muerto, sexo, observaciones } = req.body;
+    await prisma.historiales_embarazos.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        fecha, 
+        tipo_de_parto, 
+        tiempo_de_trabajo, 
+        hemorragia, 
+        lesion_perineal, 
+        toxemia, 
+        puerperio, 
+        peso_del_infante, 
+        vivo_o_muerto, 
+        sexo, 
+        observaciones,
+      },
+    })
+    res.json({mensaje: "El embarazo ha sido actualizado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+});
+
+app.delete("/historiales/embarazos/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    await prisma.historiales_embarazos.delete({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    res.json({mensaje: "El embarazo ha sido eliminado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+});
+
+app.put("/historiales/hematologias/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { globulos_rojos, globulos_blancos, hb, hematocrito, vcm } = req.body;
+    await prisma.historiales_embarazadas_hematologias.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        globulos_rojos, 
+        globulos_blancos, 
+        hb, 
+        hematocrito, 
+        vcm,
+      },
+    })
+    res.json({mensaje: "La hematologia ha sido actualizada."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+});
+
+app.delete("/historiales/hematologias/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    await prisma.historiales_embarazadas_hematologias.delete({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    res.json({mensaje: "La hematologia ha sido eliminada."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+});
+
+app.put("/historiales/examenes/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { fecha, nauseas_o_vomitos, constipacion, algias, calambres, varices, insomnio, cefalea, peso, edemas, orina_a,
+    orina_g, ta, altura_uterina, presentacion, foco_fetal, hemorragias_extra_genitales, firma_o_registro_mpps } = req.body;
+    await prisma.historiales_embarazadas_examenes_obstetricos.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        fecha, nauseas_o_vomitos, constipacion, algias, calambres, varices, insomnio, cefalea, peso, edemas, orina_a,
+        orina_g, ta, altura_uterina, presentacion, foco_fetal, hemorragias_extra_genitales, firma_o_registro_mpps
+      },
+    })
+    res.json({mensaje: "El examen obstetrico ha sido actualizado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+    
+  }
+});
+
+app.delete("/historiales/examenes/:id", async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    await prisma.historiales_embarazadas_examenes_obstetricos.delete({
+      where: {
+        id: parseInt(id),
+      },
+    })
+    res.json({mensaje: "El examen obstetrico ha sido eliminado."});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+});
 
 app.listen(port, () => {
   console.log("API corriendo en puerto " + port);
