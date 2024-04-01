@@ -1,10 +1,16 @@
 import { PrismaClient } from '@prisma/client'
+import { bcryptHashPassword } from "./utils/hash"
+import { JWTSignToken } from "./utils/jwt"
+import { authMiddleware } from "./middleware/auth"
 
 const prisma = new PrismaClient()
 
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const app = express()
 const port = 8080;
@@ -13,8 +19,65 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.post("/login", async (req: any, res: any) => {
+  try {
+    const { correo, clave } = req.body;
+    const usuario = await prisma.usuarios.findUnique({
+      where: {
+        correo,
+      },
+    });
 
-app.get("/historiales/:id", async (req: any, res: any) => {
+    if (!usuario) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado." });
+    }
+
+    const match = await bcrypt.compare(clave, usuario.clave);
+    if (match) {
+      const token = await JWTSignToken({
+        correo: usuario.correo
+      });
+      return res.json({ token });
+    } else{
+      return res.status(401).json({ mensaje: "Correo o clave incorrecta." });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ mensaje: "Ha ocurrido un error en el servidor." });
+  }
+});
+
+// Endpoint to create users
+app.post("/signup", async (req: any, res: any) => {
+  try {
+    const { correo, clave } = req.body;
+
+    const usuario = await prisma.usuarios.findUnique({
+      where: {
+        correo,
+      },
+    });
+    if (usuario) {
+      res.status(409).json({
+        mensaje: "Un usuario con este correo ya ha sido registrado. Por favor seleccione un correo diferente.",
+      });
+    } else{
+      const hashedPassword = await bcryptHashPassword(clave);
+      await prisma.usuarios.create({
+        data: {
+          correo,
+          clave: hashedPassword,
+        },
+      });
+      res.status(201).json({mensaje: "El usuario se ha creado exitosamente."});
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Ha ocurrido un error en el servidor." });
+  }
+});
+
+app.get("/historiales/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const historialMedico = await prisma.historiales.findUnique({
@@ -38,20 +101,14 @@ app.get("/historiales/:id", async (req: any, res: any) => {
 
 })
 
-app.get("/historiales", async (req: any, res: any) => {
-  const { skip, take } = req.query;
-  const props = {
-    skip: 0,
-    take: 25,
-  };
-  if(!Number.isNaN(parseInt(skip))){
-    props.skip = parseInt(skip);
-  }
-  if(!Number.isNaN(parseInt(take))){
-    props.take = parseInt(take);
-  }
+app.get("/historiales", authMiddleware, async (req: any, res: any) => {
+  let {query, page, pageSize} = req.query;
+  page = parseInt(page) || 1;
+  pageSize = parseInt(pageSize) || 8;
+  const offset = (page - 1) * pageSize;
   const historialesMedicos = await prisma.historiales.findMany({
-    ...props,    
+    skip: offset,
+    take: pageSize,    
     include: {
       embarazos: true,
       historial_embarazada: {
@@ -62,10 +119,16 @@ app.get("/historiales", async (req: any, res: any) => {
       },
     }
   });
-  res.json(historialesMedicos)
+
+  const totalCount = await prisma.historiales.count();
+
+   const nextPage = offset + pageSize < totalCount ? page + 1 : null;
+    const previousPage = page > 1 ? page - 1 : null;
+
+  res.json({data: historialesMedicos, count: totalCount, page, pageSize, nextPage, previousPage});
 })
 
-app.post("/historiales", async (req: any, res: any) => {
+app.post("/historiales", authMiddleware, async (req: any, res: any) => {
   const {
     embarazos,
     historial_embarazada,
@@ -162,6 +225,61 @@ app.post("/historiales", async (req: any, res: any) => {
   examen_fisico_sistema_ganglionar,
   examen_fisico_varices,
   examen_fisico_otros
+  } = req.body;
+
+  const {
+    pelvimetria_biisquiatico,
+      pelvimetria_sagital_anterior,
+      pelvimetria_promontorio,
+      pelvimetria_muescas_sacrociaticas,
+      pelvimetria_espinas_ciaticas,
+      pelvimetria_arco_pubico,
+      pelvimetria_sacro,
+      radiologia,
+      parto_fecha,
+      parto_hora,
+      parto_hospitalizada_en,
+      parto_dias_hospitalizada,
+      parto_duracion_del_trabajo,
+      parto_tipo_de_parto,
+      parto_lesion_perineal,
+      parto_hemorragia,
+      parto_puerperio,
+      recien_nacido_peso,
+      recien_nacido_sexo,
+      recien_nacido_talla,
+      recien_nacido_observaciones,
+      examen_post_parto_estado_general,
+      examen_post_parto_flujo,
+      examen_post_parto_genitales_externos,
+      examen_post_parto_piso_pelvico_firma,
+      examen_post_parto_piso_pelvico_relajado,
+      examen_post_parto_piso_pelvico_cistocele,
+      examen_post_parto_piso_pelvico_rectocele,
+      examen_post_parto_desgarros,
+      examen_post_parto_tacto,
+      examen_post_parto_especulo,
+      examen_post_parto_observaciones,
+      referida_a_servicio_social,
+      referida_a_servicio_social_fecha,
+      referida_a_servicio_social_resultado,
+      referida_a_servicio_cardiologia,
+      referida_a_servicio_cardiologia_fecha,
+      referida_a_servicio_cardiologia_resultado,
+      referida_a_servicio_odontologia ,
+      referida_a_servicio_odontologia_fecha,
+      referida_a_servicio_odontologia_resultado,
+      referida_a_servicio_oftalmologia,
+      referida_a_servicio_oftalmologia_fecha,
+      referida_a_servicio_oftalmologia_resultado,
+      referida_a_servicio_medicina_interna,
+      referida_a_servicio_medicina_interna_fecha,
+      referida_a_servicio_medicina_interna_resultado,
+      referida_a_servicio_reumatologia,
+      referida_a_servicio_reumatologia_fecha,
+      referida_a_servicio_reumatologia_resultado,
+      hematologias,
+      examenes_obstetricos,
   } = req.body;
 
   const historialMedicoData = {
@@ -286,64 +404,63 @@ app.post("/historiales", async (req: any, res: any) => {
   }
 
   // crear el historial de embarazada aparte
-  if(historial_embarazada){
     const historialEmbarazada = await prisma.historiales_embarazadas.create({data: {
       historial_medico_id: historialMedico.id,
-      pelvimetria_biisquiatico: historial_embarazada.pelvimetria_biisquiatico   ,
-      pelvimetria_sagital_anterior: historial_embarazada.pelvimetria_sagital_anterior   ,
-      pelvimetria_promontorio: historial_embarazada.pelvimetria_promontorio   ,
-      pelvimetria_muescas_sacrociaticas: historial_embarazada.pelvimetria_muescas_sacrociaticas   ,
-      pelvimetria_espinas_ciaticas: historial_embarazada.pelvimetria_espinas_ciaticas   ,
-      pelvimetria_arco_pubico: historial_embarazada.pelvimetria_arco_pubico   ,
-      pelvimetria_sacro: historial_embarazada.pelvimetria_sacro   ,
-      radiologia: historial_embarazada.radiologia   ,
-      parto_fecha: historial_embarazada.parto_fecha   ,
-      parto_hora: historial_embarazada.parto_hora   ,
-      parto_hospitalizada_en: historial_embarazada.parto_hospitalizada_en   ,
-      parto_dias_hospitalizada: historial_embarazada.parto_dias_hospitalizada   ,
-      parto_duracion_del_trabajo: historial_embarazada.parto_duracion_del_trabajo   ,
-      parto_tipo_de_parto: historial_embarazada.parto_tipo_de_parto   ,
-      parto_lesion_perineal: historial_embarazada.parto_lesion_perineal   ,
-      parto_hemorragia: historial_embarazada.parto_hemorragia   ,
-      parto_puerperio: historial_embarazada.parto_puerperio   ,
-      recien_nacido_peso: historial_embarazada.recien_nacido_peso   ,
-      recien_nacido_sexo: historial_embarazada.recien_nacido_sexo   ,
-      recien_nacido_talla: historial_embarazada.recien_nacido_talla   ,
-      recien_nacido_observaciones: historial_embarazada.recien_nacido_observaciones   ,
-      examen_post_parto_estado_general: historial_embarazada.examen_post_parto_estado_general   ,
-      examen_post_parto_flujo: historial_embarazada.examen_post_parto_flujo   ,
-      examen_post_parto_genitales_externos: historial_embarazada.examen_post_parto_genitales_externos   ,
-      examen_post_parto_piso_pelvico_firma: historial_embarazada.examen_post_parto_piso_pelvico_firma   ,
-      examen_post_parto_piso_pelvico_relajado: historial_embarazada.examen_post_parto_piso_pelvico_relajado   ,
-      examen_post_parto_piso_pelvico_cistocele: historial_embarazada.examen_post_parto_piso_pelvico_cistocele   ,
-      examen_post_parto_piso_pelvico_rectocele: historial_embarazada.examen_post_parto_piso_pelvico_rectocele   ,
-      examen_post_parto_desgarros: historial_embarazada.examen_post_parto_desgarros   ,
-      examen_post_parto_tacto: historial_embarazada.examen_post_parto_tacto   ,
-      examen_post_parto_especulo: historial_embarazada.examen_post_parto_especulo   ,
-      examen_post_parto_observaciones: historial_embarazada.examen_post_parto_observaciones   ,
-      referida_a_servicio_social: historial_embarazada.referida_a_servicio_social  ,
-      referida_a_servicio_social_fecha: historial_embarazada.referida_a_servicio_social_fecha   ,
-      referida_a_servicio_social_resultado: historial_embarazada.referida_a_servicio_social_resultado   ,
-      referida_a_servicio_cardiologia: historial_embarazada.referida_a_servicio_cardiologia   ,
-      referida_a_servicio_cardiologia_fecha: historial_embarazada.referida_a_servicio_cardiologia_fecha   ,
-      referida_a_servicio_cardiologia_resultado: historial_embarazada.referida_a_servicio_cardiologia_resultado   ,
-      referida_a_servicio_odontologia: historial_embarazada.referida_a_servicio_odontologia   ,
-      referida_a_servicio_odontologia_fecha: historial_embarazada.referida_a_servicio_odontologia_fecha   ,
-      referida_a_servicio_odontologia_resultado: historial_embarazada.referida_a_servicio_odontologia_resultado   ,
-      referida_a_servicio_oftalmologia: historial_embarazada.referida_a_servicio_oftalmologia   ,
-      referida_a_servicio_oftalmologia_fecha: historial_embarazada.referida_a_servicio_oftalmologia_fecha   ,
-      referida_a_servicio_oftalmologia_resultado: historial_embarazada.referida_a_servicio_oftalmologia_resultado   ,
-      referida_a_servicio_medicina_interna: historial_embarazada.referida_a_servicio_medicina_interna   ,
-      referida_a_servicio_medicina_interna_fecha: historial_embarazada.referida_a_servicio_medicina_interna_fecha   ,
-      referida_a_servicio_medicina_interna_resultado: historial_embarazada.referida_a_servicio_medicina_interna_resultado   ,
-      referida_a_servicio_reumatologia: historial_embarazada.referida_a_servicio_reumatologia   ,
-      referida_a_servicio_reumatologia_fecha: historial_embarazada.referida_a_servicio_reumatologia_fecha   ,
-      referida_a_servicio_reumatologia_resultado: historial_embarazada.referida_a_servicio_reumatologia_resultado   ,
+      pelvimetria_biisquiatico,
+      pelvimetria_sagital_anterior,
+      pelvimetria_promontorio,
+      pelvimetria_muescas_sacrociaticas,
+      pelvimetria_espinas_ciaticas,
+      pelvimetria_arco_pubico,
+      pelvimetria_sacro,
+      radiologia,
+      parto_fecha,
+      parto_hora,
+      parto_hospitalizada_en,
+      parto_dias_hospitalizada,
+      parto_duracion_del_trabajo,
+      parto_tipo_de_parto,
+      parto_lesion_perineal,
+      parto_hemorragia,
+      parto_puerperio,
+      recien_nacido_peso,
+      recien_nacido_sexo,
+      recien_nacido_talla,
+      recien_nacido_observaciones,
+      examen_post_parto_estado_general,
+      examen_post_parto_flujo,
+      examen_post_parto_genitales_externos,
+      examen_post_parto_piso_pelvico_firma,
+      examen_post_parto_piso_pelvico_relajado,
+      examen_post_parto_piso_pelvico_cistocele,
+      examen_post_parto_piso_pelvico_rectocele,
+      examen_post_parto_desgarros,
+      examen_post_parto_tacto,
+      examen_post_parto_especulo,
+      examen_post_parto_observaciones,
+      referida_a_servicio_social,
+      referida_a_servicio_social_fecha,
+      referida_a_servicio_social_resultado,
+      referida_a_servicio_cardiologia,
+      referida_a_servicio_cardiologia_fecha,
+      referida_a_servicio_cardiologia_resultado,
+      referida_a_servicio_odontologia ,
+      referida_a_servicio_odontologia_fecha,
+      referida_a_servicio_odontologia_resultado,
+      referida_a_servicio_oftalmologia,
+      referida_a_servicio_oftalmologia_fecha,
+      referida_a_servicio_oftalmologia_resultado,
+      referida_a_servicio_medicina_interna,
+      referida_a_servicio_medicina_interna_fecha,
+      referida_a_servicio_medicina_interna_resultado,
+      referida_a_servicio_reumatologia,
+      referida_a_servicio_reumatologia_fecha,
+      referida_a_servicio_reumatologia_resultado,
     }})
 
-    if(historial_embarazada.hematologias){
+    if(hematologias){
       const historialEmbarazadaHematologiasData: any = []
-      historial_embarazada.hematologias.forEach((hematologia: any) => {
+      hematologias.forEach((hematologia: any) => {
         historialEmbarazadaHematologiasData.push({
           historial_embarazada_id: historialEmbarazada.id,
           globulos_rojos: hematologia.globulos_rojos, 
@@ -355,9 +472,9 @@ app.post("/historiales", async (req: any, res: any) => {
       });
       await prisma.historiales_embarazadas_hematologias.createMany({data: historialEmbarazadaHematologiasData});
     }
-    if(historial_embarazada.examenes_obstetricos){
+    if(examenes_obstetricos){
       const historialEmbarazadaExamenesObstetricosData: any = []
-      historial_embarazada.examenes_obstetricos.forEach((examen: any) => {
+      examenes_obstetricos.forEach((examen: any) => {
         historialEmbarazadaExamenesObstetricosData.push({
           historial_embarazada_id: historialEmbarazada.id,
           fecha: examen.fecha,
@@ -382,11 +499,116 @@ app.post("/historiales", async (req: any, res: any) => {
       });
       await prisma.historiales_embarazadas_examenes_obstetricos.createMany({data: historialEmbarazadaExamenesObstetricosData});
     }
-  }
   res.json({mensaje: "El historial ha sido creado"});
 })
 
-app.put("/historiales/{id}", async (req, res) => {
+app.post("/historiales/embarazos/:id", authMiddleware, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { fecha, tipo_de_parto, tiempo_de_trabajo, hemorragia, lesion_perineal, toxemia, puerperio, peso_del_infante, vivo_o_muerto, sexo, observaciones } = req.body;
+    const embarazoData = {
+      historial_medico_id: parseInt(id),
+      fecha,
+      tipo_de_parto,
+      tiempo_de_trabajo,
+      hemorragia,
+      lesion_perineal,
+      toxemia,
+      puerperio,
+      peso_del_infante,
+      vivo_o_muerto,
+      sexo,
+      observaciones,
+    }
+   
+    const embarazo = await prisma.historiales_embarazos.create({data: embarazoData});
+    res.json({mensaje: "El embarazo ha sido creado.", id: embarazo.id});
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+})
+
+app.post("/historiales/hematologias/:id", authMiddleware, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { 
+          globulos_rojos, 
+          globulos_blancos,
+          hb,
+          hematocrito,
+          vcm,
+     } = req.body;
+    const hematologiaData = {
+      historial_embarazada_id: parseInt(id),
+      globulos_rojos, 
+      globulos_blancos,
+      hb,
+      hematocrito,
+      vcm,
+    }
+   
+    const hematologia = await prisma.historiales_embarazadas_hematologias.create({data: hematologiaData});
+    res.json({mensaje: "La hematologia ha sido creada.", id: hematologia.id});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+})
+
+app.post("/historiales/examenes/:id", authMiddleware, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { 
+      fecha,
+      nauseas_o_vomitos,
+      constipacion,
+      algias,
+      calambres,
+      varices,
+      insomnio,
+      cefalea,
+      peso,
+      edemas,
+      orina_a,
+      orina_g,
+      ta,
+      altura_uterina,
+      presentacion,
+      foco_fetal,
+      hemorragias_extra_genitales,
+      firma_o_registro_mpps,
+     } = req.body;
+
+    const examenData = {
+      historial_embarazada_id: parseInt(id),
+      fecha,
+      nauseas_o_vomitos,
+      constipacion,
+      algias,
+      calambres,
+      varices,
+      insomnio,
+      cefalea,
+      peso,
+      edemas,
+      orina_a,
+      orina_g,
+      ta,
+      altura_uterina,
+      presentacion,
+      foco_fetal,
+      hemorragias_extra_genitales,
+      firma_o_registro_mpps,
+    }
+   
+    const examen_obstetrico = await prisma.historiales_embarazadas_examenes_obstetricos.create({data: examenData});
+    res.json({mensaje: "El examen obstetrico ha sido creato.", id: examen_obstetrico.id});
+  } catch (error) {
+    res.status(500).json({mensaje: "Ha ocurrido un error en el servidor."});
+  }
+})
+
+app.put("/historiales/{id}", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
 
@@ -595,7 +817,7 @@ app.put("/historiales/{id}", async (req, res) => {
   }
 })
 
-app.delete("/historiales/:id", async (req: any, res: any) => {
+app.delete("/historiales/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     await prisma.historiales.delete({
@@ -609,7 +831,7 @@ app.delete("/historiales/:id", async (req: any, res: any) => {
   }
 })
 
-app.put("/historiales/embarazos/:id", async (req: any, res: any) => {
+app.put("/historiales/embarazos/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { fecha, tipo_de_parto, tiempo_de_trabajo, hemorragia, lesion_perineal, toxemia, puerperio, peso_del_infante, vivo_o_muerto, sexo, observaciones } = req.body;
@@ -637,7 +859,7 @@ app.put("/historiales/embarazos/:id", async (req: any, res: any) => {
   }
 });
 
-app.delete("/historiales/embarazos/:id", async (req: any, res: any) => {
+app.delete("/historiales/embarazos/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     await prisma.historiales_embarazos.delete({
@@ -651,7 +873,7 @@ app.delete("/historiales/embarazos/:id", async (req: any, res: any) => {
   }
 });
 
-app.put("/historiales/hematologias/:id", async (req: any, res: any) => {
+app.put("/historiales/hematologias/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { globulos_rojos, globulos_blancos, hb, hematocrito, vcm } = req.body;
@@ -673,7 +895,7 @@ app.put("/historiales/hematologias/:id", async (req: any, res: any) => {
   }
 });
 
-app.delete("/historiales/hematologias/:id", async (req: any, res: any) => {
+app.delete("/historiales/hematologias/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     await prisma.historiales_embarazadas_hematologias.delete({
@@ -687,7 +909,7 @@ app.delete("/historiales/hematologias/:id", async (req: any, res: any) => {
   }
 });
 
-app.put("/historiales/examenes/:id", async (req: any, res: any) => {
+app.put("/historiales/examenes/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { fecha, nauseas_o_vomitos, constipacion, algias, calambres, varices, insomnio, cefalea, peso, edemas, orina_a,
@@ -708,7 +930,7 @@ app.put("/historiales/examenes/:id", async (req: any, res: any) => {
   }
 });
 
-app.delete("/historiales/examenes/:id", async (req: any, res: any) => {
+app.delete("/historiales/examenes/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
     await prisma.historiales_embarazadas_examenes_obstetricos.delete({

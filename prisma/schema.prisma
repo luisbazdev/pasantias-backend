@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuarios{
+  id        Int      @id @default(autoincrement())
+  correo   String? @db.VarChar(255) @unique
+  clave   String? @db.VarChar(255)
+}
+
 model Historiales{
   id        Int      @id @default(autoincrement())
   historial_embarazada Historiales_embarazadas?
@@ -38,15 +44,15 @@ model Historiales{
   telefono   String? @db.Text
   nombre_conyuge   String? @db.Text
   direccion_conyuge   String? @db.Text
-  antecedentes_familiares_tbc   String? @db.Text
-  antecedentes_familiares_sifilis   String? @db.Text
-  antecedentes_familiares_diabetes   String? @db.Text
-  antecedentes_familiares_neurologicas_y_mentales   String? @db.Text
-  antecedentes_familiares_cardiopatias   String? @db.Text
-  antecedentes_familiares_nefritis   String? @db.Text
-  antecedentes_familiares_embarazos_multiples   String? @db.Text
-  antecedentes_familiares_otros   String? @db.Text
-  antecedentes_familiares_cancer   String? @db.Text
+  antecedentes_familiares_tbc   Boolean  @default(false)
+  antecedentes_familiares_sifilis   Boolean  @default(false)
+  antecedentes_familiares_diabetes   Boolean  @default(false)
+  antecedentes_familiares_neurologicas_y_mentales   Boolean  @default(false)
+  antecedentes_familiares_cardiopatias   Boolean  @default(false)
+  antecedentes_familiares_nefritis   Boolean  @default(false)
+  antecedentes_familiares_embarazos_multiples   Boolean  @default(false)
+  antecedentes_familiares_otros   Boolean  @default(false)
+  antecedentes_familiares_cancer   Boolean  @default(false)
   datos_menstruales_edad_menarquia   String? @db.Text
   datos_menstruales_ciclo   String? @db.Text
   datos_menstruales_duracion   String? @db.Text
