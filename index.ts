@@ -499,7 +499,7 @@ app.post("/historiales", authMiddleware, async (req: any, res: any) => {
       });
       await prisma.historiales_embarazadas_examenes_obstetricos.createMany({data: historialEmbarazadaExamenesObstetricosData});
     }
-  res.json({mensaje: "El historial ha sido creado"});
+  res.json({mensaje: "El historial ha sido creado", id: historialMedico.id});
 })
 
 app.post("/historiales/embarazos/:id", authMiddleware, async (req: any, res: any) => {
@@ -608,7 +608,7 @@ app.post("/historiales/examenes/:id", authMiddleware, async (req: any, res: any)
   }
 })
 
-app.put("/historiales/{id}", authMiddleware, async (req: any, res: any) => {
+app.put("/historiales/:id", authMiddleware, async (req: any, res: any) => {
   try {
     const { id } = req.params;
 
