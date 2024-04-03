@@ -8,9 +8,10 @@ export const authMiddleware = async function(req: any, res: any, next: any) {
     }
 
     try {
-        jwt.verify(token, "privateKey");
+        jwt.verify(token, process.env.SECRET_KEY);
         return next();
     } catch (error) {
+        console.log(error)
         return res.status(401).json({ mensaje: "Token invalido." });
     }
 }

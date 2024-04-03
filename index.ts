@@ -102,13 +102,38 @@ app.get("/historiales/:id", authMiddleware, async (req: any, res: any) => {
 })
 
 app.get("/historiales", authMiddleware, async (req: any, res: any) => {
-  let {query, page, pageSize} = req.query;
+  let {query, start, end, page, pageSize} = req.query;
   page = parseInt(page) || 1;
   pageSize = parseInt(pageSize) || 8;
   const offset = (page - 1) * pageSize;
+
+  let filters: any = {};
+
+  if (query) {
+    filters["OR"] = [
+      { "nombre": { contains: query } },
+      { "cedula_de_identidad": { contains: query } }
+    ]
+  }
+
+  if (start) {
+    filters["createdAt"] = filters["createdAt"] || {}; // Initialize as an object if not exists
+    const startDate = new Date(start); // Create Date object
+    startDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
+    filters["createdAt"]["gte"] = startDate; // Greater than or equal to start date
+  }
+  
+  if (end) {
+    filters["createdAt"] = filters["createdAt"] || {}; // Initialize as an object if not exists
+    const endDate = new Date(end); // Create Date object
+    endDate.setHours(23, 59, 59, 999); // Set hours, minutes, seconds, and milliseconds to the end of the day
+    filters["createdAt"]["lte"] = endDate; // Less than or equal to end date
+  }
+
   const historialesMedicos = await prisma.historiales.findMany({
     skip: offset,
-    take: pageSize,    
+    take: pageSize,   
+    where: filters, 
     include: {
       embarazos: true,
       historial_embarazada: {
@@ -120,7 +145,9 @@ app.get("/historiales", authMiddleware, async (req: any, res: any) => {
     }
   });
 
-  const totalCount = await prisma.historiales.count();
+  const totalCount = await prisma.historiales.count({
+    where: filters
+  });
 
    const nextPage = offset + pageSize < totalCount ? page + 1 : null;
     const previousPage = page > 1 ? page - 1 : null;
