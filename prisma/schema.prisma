@@ -44,6 +44,7 @@ model Historiales{
   telefono   String? @db.Text
   nombre_conyuge   String? @db.Text
   direccion_conyuge   String? @db.Text
+  telefono_conyuge   String? @db.Text
   antecedentes_familiares_tbc   Boolean  @default(false)
   antecedentes_familiares_sifilis   Boolean  @default(false)
   antecedentes_familiares_diabetes   Boolean  @default(false)
@@ -83,7 +84,9 @@ model Historiales{
   historia_medica_pasada_fracturas   String? @db.Text
   historia_medica_pasada_antibioticos   String? @db.Text
   historia_medica_pasada_paludismo   String? @db.Text
+  historia_medica_pasada_venereas   String? @db.Text
   historia_medica_pasada_nefropatias   String? @db.Text
+  historia_medica_pasada_leucorea   String? @db.Text
   historia_medica_pasada_electrocoagulaciones   String? @db.Text
   historia_medica_pasada_otro   String? @db.Text
   antecedentes_quirurgicos   String? @db.Text
@@ -96,6 +99,7 @@ model Historiales{
   registro_mpps   String? @db.Text
   firma   String? @db.Text
   examen_fisico_talla   String? @db.Text
+  examen_fisico_anexos   String? @db.Text
   examen_fisico_peso_previo   String? @db.Text
   examen_fisico_aspecto_general   String? @db.Text
   examen_fisico_edemas   String? @db.Text
