@@ -7,7 +7,7 @@ export const JWTSignToken = async function (payload: any) {
         process.env.SECRET_KEY,
         {
           algorithm: "HS256",
-          expiresIn: "24h",
+          expiresIn: "1y",
         }
       );
       return asyncToken;
