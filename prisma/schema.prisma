@@ -149,6 +149,19 @@ model Historiales_embarazadas{
   historial_medico_id Int @unique
   hematologias Historiales_embarazadas_hematologias[]
   examenes_obstetricos Historiales_embarazadas_examenes_obstetricos[]
+  reposos Historiales_embarazadas_reposos[]
+  examenes_complementarios_1_fecha   String? @db.Text
+  examenes_complementarios_1_grupo_sanguineo   String? @db.Text
+  examenes_complementarios_1_conyuge   String? @db.Text
+  examenes_complementarios_1_heces   String? @db.Text
+  examenes_complementarios_2_fecha   String? @db.Text
+  examenes_complementarios_2_rh   String? @db.Text
+  examenes_complementarios_2_conyuge   String? @db.Text
+  examenes_complementarios_2_flujo_vaginal   String? @db.Text
+  examenes_complementarios_3_fecha   String? @db.Text
+  examenes_complementarios_3_kahn_vdrl   String? @db.Text
+  examenes_complementarios_3_conyuge   String? @db.Text
+  examenes_complementarios_3_titulacion_de_aglutininas   String? @db.Text
   pelvimetria_biisquiatico   String? @db.Text
   pelvimetria_sagital_anterior   String? @db.Text
   pelvimetria_promontorio   String? @db.Text
@@ -157,6 +170,9 @@ model Historiales_embarazadas{
   pelvimetria_arco_pubico   String? @db.Text
   pelvimetria_sacro   String? @db.Text
   radiologia   String? @db.Text
+  estrecho_superior   String? @db.Text
+  estrecho_medio   String? @db.Text
+  estrecho_inferior   String? @db.Text
   parto_fecha   String? @db.Text
   parto_hora   String? @db.Text
   parto_hospitalizada_en   String? @db.Text
@@ -212,6 +228,14 @@ model Historiales_embarazadas_hematologias{
   hb   String? @db.Text
   hematocrito   String? @db.Text
   vcm   String? @db.Text
+}
+
+model Historiales_embarazadas_reposos{
+  id        Int      @id @default(autoincrement())
+  historial_embarazada   Historiales_embarazadas  @relation(fields: [historial_embarazada_id], references: [id], onDelete: Cascade)
+  historial_embarazada_id Int
+  pre_natal   String? @db.Text
+  post_natal   String? @db.Text
 }
 
 model Historiales_embarazadas_examenes_obstetricos{

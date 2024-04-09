@@ -73,6 +73,7 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
             include: {
               hematologias: true,
               examenes_obstetricos: true,
+              reposos: true,
             }
           },
         }
@@ -240,6 +241,22 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
         referida_a_servicio_reumatologia_resultado,
         hematologias,
         examenes_obstetricos,
+        reposos,
+        examenes_complementarios_1_fecha,
+        examenes_complementarios_1_grupo_sanguineo,
+        examenes_complementarios_1_conyuge,
+        examenes_complementarios_1_heces,
+        examenes_complementarios_2_fecha,
+        examenes_complementarios_2_rh,
+        examenes_complementarios_2_conyuge,
+        examenes_complementarios_2_flujo_vaginal,
+        examenes_complementarios_3_fecha,
+        examenes_complementarios_3_kahn_vdrl,
+        examenes_complementarios_3_conyuge,
+        examenes_complementarios_3_titulacion_de_aglutininas,
+        estrecho_superior,
+        estrecho_medio,
+        estrecho_inferior,
     } = req.body;
   
     const historialMedicoData = {
@@ -340,7 +357,7 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
     examen_fisico_aparato_locomotor,
     examen_fisico_sistema_ganglionar,
     examen_fisico_varices,
-    examen_fisico_otros
+    examen_fisico_otros,
     };
   
     const historialMedico = await prisma.historiales.create({data: historialMedicoData});
@@ -420,6 +437,21 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
         referida_a_servicio_reumatologia,
         referida_a_servicio_reumatologia_fecha,
         referida_a_servicio_reumatologia_resultado,
+        examenes_complementarios_1_fecha,
+        examenes_complementarios_1_grupo_sanguineo,
+        examenes_complementarios_1_conyuge,
+        examenes_complementarios_1_heces,
+        examenes_complementarios_2_fecha,
+        examenes_complementarios_2_rh,
+        examenes_complementarios_2_conyuge,
+        examenes_complementarios_2_flujo_vaginal,
+        examenes_complementarios_3_fecha,
+        examenes_complementarios_3_kahn_vdrl,
+        examenes_complementarios_3_conyuge,
+        examenes_complementarios_3_titulacion_de_aglutininas,
+        estrecho_superior,
+        estrecho_medio,
+        estrecho_inferior,
       }})
   
       if(hematologias){
@@ -463,6 +495,18 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
         });
         await prisma.historiales_embarazadas_examenes_obstetricos.createMany({data: historialEmbarazadaExamenesObstetricosData});
       }
+
+      if(reposos){
+        const historialEmbarazadaRepososData: any = []
+        reposos.forEach((reposo: any) => {
+          historialEmbarazadaRepososData.push({
+            historial_embarazada_id: historialEmbarazada.id,
+            pre_natal: reposo.pre_natal, 
+            post_natal: reposo.post_natal
+          })
+        });
+        await prisma.historiales_embarazadas_reposos.createMany({data: historialEmbarazadaRepososData});
+      }
     res.json({mensaje: "El historial ha sido creado", id: historialMedico.id});
   })
   
@@ -471,7 +515,6 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
       const { id } = req.params;
   
       const {
-        historial_embarazada,
         numero_de_historia   ,
         fecha   ,
         revisada   ,
@@ -568,7 +611,7 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
         examen_fisico_aparato_locomotor,
         examen_fisico_sistema_ganglionar,
         examen_fisico_varices,
-        examen_fisico_otros
+        examen_fisico_otros,
       } = req.body;
   
       const {
@@ -622,6 +665,21 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
         referida_a_servicio_reumatologia,
         referida_a_servicio_reumatologia_fecha,
         referida_a_servicio_reumatologia_resultado,
+        examenes_complementarios_1_fecha,
+        examenes_complementarios_1_grupo_sanguineo,
+        examenes_complementarios_1_conyuge,
+        examenes_complementarios_1_heces,
+        examenes_complementarios_2_fecha,
+        examenes_complementarios_2_rh,
+        examenes_complementarios_2_conyuge,
+        examenes_complementarios_2_flujo_vaginal,
+        examenes_complementarios_3_fecha,
+        examenes_complementarios_3_kahn_vdrl,
+        examenes_complementarios_3_conyuge,
+        examenes_complementarios_3_titulacion_de_aglutininas,
+        estrecho_superior,
+        estrecho_medio,
+        estrecho_inferior,
       } = req.body
   
       // talvez el historial_embarazada debe hacerse de manera diferente.
@@ -682,6 +740,21 @@ router.get("/historiales", authMiddleware, async (req: any, res: any) => {
               referida_a_servicio_reumatologia: referida_a_servicio_reumatologia == true,
               referida_a_servicio_reumatologia_fecha,
               referida_a_servicio_reumatologia_resultado,
+              examenes_complementarios_1_fecha,
+              examenes_complementarios_1_grupo_sanguineo,
+              examenes_complementarios_1_conyuge,
+              examenes_complementarios_1_heces,
+              examenes_complementarios_2_fecha,
+              examenes_complementarios_2_rh,
+              examenes_complementarios_2_conyuge,
+              examenes_complementarios_2_flujo_vaginal,
+              examenes_complementarios_3_fecha,
+              examenes_complementarios_3_kahn_vdrl,
+              examenes_complementarios_3_conyuge,
+              examenes_complementarios_3_titulacion_de_aglutininas,
+              estrecho_superior,
+              estrecho_medio,
+              estrecho_inferior,
             }
           },
           numero_de_historia   ,
